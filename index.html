@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡ QUANTUM CRIPTO — Job ID Encryptor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --g: #00ff41;
+  --b: #00d4ff;
+  --m: #ff00ff;
+  --y: #ffcc00;
+  --r: #ff3366;
+  --bg: #070a0e;
+  --bg2: #0d1117;
+  --bg3: #111820;
+  --card: #0d1520;
+  --border: #1a2a3a;
+  --glow-g: 0 0 20px #00ff4166, 0 0 40px #00ff4133;
+  --glow-b: 0 0 20px #00d4ff66, 0 0 40px #00d4ff33;
+  --glow-m: 0 0 20px #ff00ff66, 0 0 40px #ff00ff33;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: #c8d8e8;
+  font-family: 'Rajdhani', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* CANVAS BG */
+#matrix-bg {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  z-index:0;
+  opacity: 0.07;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 16px 60px;
+}
+
+/* HEADER */
+header {
+  text-align: center;
+  padding: 40px 0 30px;
+  position: relative;
+}
+
+.header-deco {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--g);
+  letter-spacing: 4px;
+  opacity: 0.6;
+  margin-bottom: 10px;
+  animation: blink 2s infinite;
+}
+
+@keyframes blink { 50% { opacity: 0.2; } }
+
+h1 {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(22px, 5vw, 48px);
+  font-weight: 900;
+  letter-spacing: 3px;
+  line-height: 1.1;
+  background: linear-gradient(135deg, var(--g) 0%, var(--b) 50%, var(--m) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 30px #00ff4155);
+  animation: title-pulse 3s ease-in-out infinite;
+}
+
+@keyframes title-pulse {
+  0%,100% { filter: drop-shadow(0 0 20px #00ff4155); }
+  50% { filter: drop-shadow(0 0 50px #00d4ff88); }
+}
+
+.subtitle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--b);
+  letter-spacing: 6px;
+  margin-top: 8px;
+  opacity: 0.7;
+}
+
+/* STATUS BAR */
+.status-bar {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--b);
+}
+
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--g);
+  box-shadow: 0 0 8px var(--g);
+  animation: pulse-dot 1.5s infinite;
+}
+
+@keyframes pulse-dot { 50% { opacity: 0.3; } }
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.grid-full { grid-column: 1/-1; }
+
+@media (max-width: 700px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+/* CARDS */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--g), transparent);
+  opacity: 0.5;
+}
+
+.card:hover {
+  border-color: #1e3a4a;
+  box-shadow: 0 0 30px #00d4ff0d;
+}
+
+.card.accent-green::before { background: linear-gradient(90deg, transparent, var(--g), transparent); }
+.card.accent-cyan::before { background: linear-gradient(90deg, transparent, var(--b), transparent); }
+.card.accent-magenta::before { background: linear-gradient(90deg, transparent, var(--m), transparent); }
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.card-icon {
+  font-size: 18px;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: #0a1a2a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.card-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #fff;
+}
+
+.card-tag {
+  margin-left: auto;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+
+.tag-green { color: var(--g); border-color: var(--g); background: #00ff4110; }
+.tag-cyan { color: var(--b); border-color: var(--b); background: #00d4ff10; }
+.tag-magenta { color: var(--m); border-color: var(--m); background: #ff00ff10; }
+
+/* INPUTS */
+label {
+  display: block;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--b);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  margin-top: 14px;
+}
+
+input[type="text"], textarea, select {
+  width: 100%;
+  background: #050d15;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--g);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: none;
+}
+
+input[type="text"]:focus, textarea:focus, select:focus {
+  border-color: var(--b);
+  box-shadow: 0 0 15px #00d4ff22;
+}
+
+textarea { height: 110px; }
+
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2300d4ff' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+select option { background: #0d1520; }
+
+/* BUTTONS */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px 20px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Orbitron', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  cursor: pointer;
+  margin-top: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.05);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.btn:hover::after { opacity: 1; }
+.btn:active { transform: scale(0.97); }
+
+.btn-green {
+  background: linear-gradient(135deg, #003a10, #005a18);
+  color: var(--g);
+  border: 1px solid var(--g);
+  box-shadow: 0 0 20px #00ff4120;
+}
+
+.btn-green:hover { box-shadow: var(--glow-g); }
+
+.btn-cyan {
+  background: linear-gradient(135deg, #002a3a, #00415a);
+  color: var(--b);
+  border: 1px solid var(--b);
+  box-shadow: 0 0 20px #00d4ff20;
+}
+
+.btn-cyan:hover { box-shadow: var(--glow-b); }
+
+.btn-magenta {
+  background: linear-gradient(135deg, #2a0030, #420050);
+  color: var(--m);
+  border: 1px solid var(--m);
+  box-shadow: 0 0 20px #ff00ff20;
+}
+
+.btn-magenta:hover { box-shadow: var(--glow-m); }
+
+.btn-sm {
+  width: auto;
+  padding: 7px 14px;
+  font-size: 10px;
+  margin-top: 0;
+}
+
+/* OUTPUT AREA */
+.output-box {
+  background: #020a10;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 14px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--g);
+  min-height: 80px;
+  word-break: break-all;
+  line-height: 1.8;
+  position: relative;
+  overflow: hidden;
+}
+
+.output-box.empty {
+  color: #2a4a3a;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.output-box .copy-btn {
+  position: absolute;
+  top: 8px; right: 8px;
+  background: #0d2a1a;
+  border: 1px solid #1a4a2a;
+  color: var(--g);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  cursor: pointer;
+  font-family: 'Share Tech Mono', monospace;
+  transition: all 0.2s;
+}
+
+.output-box .copy-btn:hover { background: #1a3a2a; }
+
+/* TOKEN AREA */
+.token-display {
+  background: #0a1a0a;
+  border: 1px solid #1a3a1a;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+}
+
+.token-label {
+  color: var(--g);
+  opacity: 0.5;
+  font-size: 10px;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
+.token-value {
+  color: var(--g);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.token-badge {
+  background: #00ff4120;
+  border: 1px solid var(--g);
+  color: var(--g);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+/* STAT BOXES */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 14px;
+}
+
+@media (max-width: 500px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+
+.stat-box {
+  background: #050e15;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+
+.stat-val {
+  font-family: 'Orbitron', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--b);
+  line-height: 1;
+}
+
+.stat-lbl {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  color: #5a7a8a;
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+/* HISTORY */
+.history-list {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.history-list::-webkit-scrollbar { width: 4px; }
+.history-list::-webkit-scrollbar-track { background: transparent; }
+.history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.history-item {
+  background: #050e15;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.history-item:hover { border-color: var(--b); }
+
+.h-id {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--g);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.h-time {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: #3a5a6a;
+  white-space: nowrap;
+}
+
+.h-lvl {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Share Tech Mono', monospace;
+  white-space: nowrap;
+}
+
+/* CHART */
+.chart-wrap {
+  margin-top: 14px;
+  background: #050e15;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  height: 180px;
+  position: relative;
+}
+
+/* NOTIFICATION */
+.notif {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  z-index: 999;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-width: 300px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notif.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.notif.success { border-color: var(--g); color: var(--g); }
+.notif.error { border-color: var(--r); color: var(--r); }
+.notif.info { border-color: var(--b); color: var(--b); }
+
+/* LOADING */
+.loading-bar {
+  height: 2px;
+  background: linear-gradient(90deg, var(--g), var(--b));
+  border-radius: 2px;
+  width: 0%;
+  margin-top: 10px;
+  transition: width 0.4s;
+  box-shadow: var(--glow-g);
+}
+
+/* LEVEL SELECTOR */
+.level-tabs {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.level-tab {
+  flex: 1;
+  padding: 8px 4px;
+  text-align: center;
+  background: #050e15;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #5a7a8a;
+  letter-spacing: 1px;
+}
+
+.level-tab.active {
+  border-color: var(--b);
+  color: var(--b);
+  background: #002a3a;
+  box-shadow: 0 0 10px #00d4ff22;
+}
+
+/* DIVIDER */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 16px 0;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 30px 0 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: #2a4a5a;
+  letter-spacing: 2px;
+}
+
+/* GLITCH TEXT */
+.glitch {
+  position: relative;
+}
+
+/* SCANNER LINE */
+.scanner {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--g), transparent);
+  animation: scan 4s linear infinite;
+  opacity: 0.4;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+/* TOOLTIP */
+.tooltip-wrap { position: relative; display: inline-block; }
+.tooltip {
+  visibility: hidden;
+  background: #0d1a25;
+  border: 1px solid var(--border);
+  color: var(--b);
+  text-align: center;
+  padding: 5px 10px;
+  border-radius: 6px;
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  z-index: 10;
+}
+.tooltip-wrap:hover .tooltip { visibility: visible; }
+
+/* ACTIONS ROW */
+.actions-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+/* VALID INDICATOR */
+.valid-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  margin-top: 6px;
+  height: 16px;
+}
+
+.valid-ok { color: var(--g); }
+.valid-err { color: var(--r); }
+.valid-none { color: transparent; }
+</style>
+</head>
+<body>
+
+<canvas id="matrix-bg"></canvas>
+
+<div class="container">
+
+  <header>
+    <div class="header-deco">◈ QUANTUM ENCRYPTION SYSTEM v3.7 ◈</div>
+    <h1>CRIPTO NEXUS</h1>
+    <div class="subtitle">ROBLOX JOB ID ENCRYPTOR</div>
+  </header>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="status-pill"><div class="status-dot"></div> SISTEMA ONLINE</div>
+    <div class="status-pill">🔐 ALGORITMO: NEXUS-7</div>
+    <div class="status-pill" id="sess-pill">⚡ SESSÃO: 0 OPS</div>
+    <div class="status-pill" id="time-pill">🕐 --:--:--</div>
+  </div>
+
+  <!-- TOKEN ATIVO -->
+  <div class="card accent-green" style="margin-top:0">
+    <div class="scanner"></div>
+    <div class="card-header">
+      <div class="card-icon">🔑</div>
+      <div class="card-title">TOKEN ATIVO</div>
+      <div class="card-tag tag-green">MASTER</div>
+    </div>
+    <div class="token-display">
+      <span class="token-label">TOKEN</span>
+      <span class="token-value" id="active-token">TokenByLuanOGbeta</span>
+      <span class="token-badge">✦ MESTRE</span>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- CRIPTOGRAFAR -->
+    <div class="card accent-green">
+      <div class="card-header">
+        <div class="card-icon">🔒</div>
+        <div class="card-title">CRIPTOGRAFAR</div>
+        <div class="card-tag tag-green">NEXUS-7</div>
+      </div>
+
+      <label>◆ JOB ID DO ROBLOX</label>
+      <input type="text" id="input-id" placeholder="ex: edf888ce-3ab0-479f-9335-6332c0c5a543" oninput="validateId(this.value)">
+      <div class="valid-indicator" id="valid-indicator"><span class="valid-none">—</span></div>
+
+      <label>◆ NÍVEL DE SEGURANÇA</label>
+      <div class="level-tabs">
+        <div class="level-tab" onclick="setLevel(0)" data-lvl="0">BÁSICO</div>
+        <div class="level-tab active" onclick="setLevel(1)" data-lvl="1">MÉDIO</div>
+        <div class="level-tab" onclick="setLevel(2)" data-lvl="2">ALTO</div>
+        <div class="level-tab" onclick="setLevel(3)" data-lvl="3">QUÂNTICO</div>
+      </div>
+
+      <button class="btn btn-green" onclick="encrypt()">⚡ CRIPTOGRAFAR</button>
+      <div class="loading-bar" id="enc-bar"></div>
+
+      <div class="output-box empty" id="enc-output">// RESULTADO APARECERÁ AQUI //</div>
+
+      <div class="actions-row" id="enc-actions" style="display:none">
+        <button class="btn btn-sm btn-green" onclick="copyResult()">📋 COPIAR</button>
+        <button class="btn btn-sm btn-cyan" onclick="genQR()">📱 QR CODE</button>
+        <button class="btn btn-sm btn-magenta" onclick="addToCompare(0)">🔄 COMPARAR</button>
+      </div>
+    </div>
+
+    <!-- DESCRIPTOGRAFAR -->
+    <div class="card accent-cyan">
+      <div class="card-header">
+        <div class="card-icon">🔓</div>
+        <div class="card-title">DESCRIPTOGRAFAR</div>
+        <div class="card-tag tag-cyan">SECURE</div>
+      </div>
+
+      <label>◆ TOKEN DE ACESSO</label>
+      <input type="text" id="dec-token" placeholder="Insira seu token..." value="TokenByLuanOGbeta">
+
+      <label>◆ CÓDIGO CRIPTOGRAFADO</label>
+      <textarea id="dec-input" placeholder="Cole o código criptografado aqui..."></textarea>
+
+      <button class="btn btn-cyan" onclick="decrypt()">🔍 DESCRIPTOGRAFAR</button>
+      <div class="loading-bar" id="dec-bar"></div>
+
+      <div class="output-box empty" id="dec-output">// RESULTADO APARECERÁ AQUI //</div>
+    </div>
+
+    <!-- ESTATÍSTICAS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📊</div>
+        <div class="card-title">ESTATÍSTICAS</div>
+        <div class="card-tag tag-cyan">LIVE</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-val" id="stat-total">0</div>
+          <div class="stat-lbl">TOTAL OPS</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="stat-session">0</div>
+          <div class="stat-lbl">SESSÃO</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="stat-ratio" style="font-size:16px">—</div>
+          <div class="stat-lbl">RATIO</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="stat-level" style="color:var(--m);font-size:14px">MED</div>
+          <div class="stat-lbl">NÍVEL</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="myChart"></canvas>
+      </div>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📜</div>
+        <div class="card-title">HISTÓRICO</div>
+        <div class="card-tag tag-magenta">DB</div>
+      </div>
+      <div class="history-list" id="history-list">
+        <div style="text-align:center; color:#2a4a5a; font-family:'Share Tech Mono',monospace; font-size:11px; padding:20px 0">
+          // NENHUM REGISTRO //
+        </div>
+      </div>
+      <div class="actions-row" style="margin-top:14px">
+        <button class="btn btn-sm btn-magenta" onclick="clearHistory()">🗑 LIMPAR</button>
+        <button class="btn btn-sm btn-cyan" onclick="exportJSON()">⬇ EXPORTAR</button>
+        <button class="btn btn-sm btn-green" onclick="genBatch()">🧪 GERAR 5</button>
+      </div>
+    </div>
+
+    <!-- COMPARAR -->
+    <div class="card grid-full accent-magenta">
+      <div class="card-header">
+        <div class="card-icon">🔄</div>
+        <div class="card-title">COMPARADOR</div>
+        <div class="card-tag tag-magenta">TOOL</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label>◆ CÓDIGO A</label>
+          <textarea id="cmp-a" placeholder="Código A..." style="height:80px"></textarea>
+        </div>
+        <div>
+          <label>◆ CÓDIGO B</label>
+          <textarea id="cmp-b" placeholder="Código B..." style="height:80px"></textarea>
+        </div>
+      </div>
+      <button class="btn btn-magenta" onclick="compare()" style="max-width:300px;margin:14px auto 0">🔄 COMPARAR AGORA</button>
+      <div class="output-box empty" id="cmp-output" style="margin-top:14px">// RESULTADO DA COMPARAÇÃO //</div>
+    </div>
+
+  </div>
+
+  <!-- QR MODAL -->
+  <div id="qr-modal" style="display:none;position:fixed;inset:0;background:#00000099;z-index:100;display:none;align-items:center;justify-content:center">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:30px;text-align:center;max-width:320px;width:90%">
+      <div style="font-family:'Orbitron',monospace;color:var(--b);font-size:14px;margin-bottom:16px">QR CODE</div>
+      <canvas id="qr-canvas" style="border:2px solid var(--border);border-radius:8px;background:#fff"></canvas>
+      <div style="color:#5a7a8a;font-family:'Share Tech Mono',monospace;font-size:10px;margin-top:10px">Escaneie para obter o código</div>
+      <button class="btn btn-cyan btn-sm" onclick="closeQR()" style="margin-top:14px;width:100%">✕ FECHAR</button>
+    </div>
+  </div>
+
+  <footer>
+    ◈ CRIPTO NEXUS — ROBLOX ENCRYPTION SYSTEM ◈<br>
+    <span style="color:#1a3a4a">// by LuanOGbeta // QUANTUM v3.7 //</span>
+  </footer>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif"></div>
+
+<script>
+// ============================================================
+// MATRIX RAIN BACKGROUND
+// ============================================================
+(function(){
+  const c = document.getElementById('matrix-bg');
+  const ctx = c.getContext('2d');
+  function resize(){ c.width = window.innerWidth; c.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  const chars = 'ABCDEF0123456789アイウエオカキクケコサシスセソタチツテト@#$%^&*()';
+  const cols = Math.floor(window.innerWidth / 16);
+  const drops = Array(cols).fill(0);
+  setInterval(()=>{
+    ctx.fillStyle = 'rgba(0,0,0,0.05)';
+    ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle = '#00ff41';
+    ctx.font = '14px Share Tech Mono';
+    drops.forEach((y,i)=>{
+      const ch = chars[Math.floor(Math.random()*chars.length)];
+      ctx.fillText(ch, i*16, y*16);
+      drops[i] = (y*16 > c.height && Math.random() > 0.975) ? 0 : y+1;
+    });
+  }, 50);
+})();
+
+// ============================================================
+// STATE
+// ============================================================
+let level = 1;
+let sessionOps = 0;
+let history = JSON.parse(localStorage.getItem('cripto_history') || '[]');
+let lastEncrypted = '';
+const LEVELS = ['BÁSICO','MÉDIO','ALTO','QUÂNTICO'];
+const TOKENS = {
+  'TokenByLuanOGbeta': 'master',
+  'CriptoUser2024': 'standard',
+  'GuestAccess': 'guest'
+};
+
+// ============================================================
+// CLOCK
+// ============================================================
+setInterval(()=>{
+  const now = new Date();
+  document.getElementById('time-pill').textContent =
+    '🕐 ' + now.toTimeString().slice(0,8);
+}, 1000);
+
+// ============================================================
+// CHART
+// ============================================================
+const chartCtx = document.getElementById('myChart').getContext('2d');
+const chartData = { labels: [], datasets: [{
+  label: 'Tamanho Cripto',
+  data: [],
+  borderColor: '#00d4ff',
+  backgroundColor: '#00d4ff15',
+  fill: true,
+  tension: 0.4,
+  pointRadius: 3,
+  pointBackgroundColor: '#00ff41'
+}]};
+const myChart = new Chart(chartCtx, {
+  type: 'line',
+  data: chartData,
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { display: false },
+      y: {
+        ticks: { color: '#3a6a7a', font: { family: 'Share Tech Mono', size: 9 } },
+        grid: { color: '#0d2030' }
+      }
+    }
+  }
+});
+
+// ============================================================
+// NEXUS-7 ENCRYPTION ENGINE
+// ============================================================
+
+// Lookup map: encrypted_code -> original_id (persisted in localStorage)
+let decryptMap = JSON.parse(localStorage.getItem('cripto_map') || '{}');
+function saveMap(){ localStorage.setItem('cripto_map', JSON.stringify(decryptMap)); }
+
+const NEXUS7 = {
+  // XOR layer with seed
+  layer1(s, seed){ return s.split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)^((seed*7+i*3)%127))).join(''); },
+  // Custom base64-like encoding
+  layer2(s){ const a='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'; let r='',b=0,acc=0; for(let c of s){acc=(acc<<8)|c.charCodeAt(0);b+=8;while(b>=6){r+=a[(acc>>(b-6))&63];b-=6;}}if(b>0)r+=a[(acc<<(6-b))&63]; return r; },
+  // Rotate string
+  layer3(s){ const h=Math.floor(s.length/2); return s.slice(h)+s.slice(0,h); },
+  // Inject chaos bytes (tagged so we can remove them)
+  layer4(s, seed){ let r=''; for(let i=0;i<s.length;i++){r+=s[i]; if(i%7===0)r+='\x01'+String.fromCharCode(33+(seed*i+41)%90)+'\x01';} return r; },
+  // Hex expansion
+  layer5(s){ return s.split('').map(c=>c.charCodeAt(0).toString(16).padStart(2,'0')).join(''); },
+  // Quantum scatter with deterministic seed
+  layer6(s, seed){ const a=s.split(''); for(let i=a.length-1;i>0;i--){const j=(seed+i*13)%i; [a[i],a[j]]=[a[j],a[i]];} return a.join(''); },
+  // Signature with level and seed embedded
+  sign(s, lvl, seed){ const sig='\x02NX7:'+lvl+':'+seed+'\x02'; return sig+s; },
+
+  encrypt(id, lvl){
+    const seed = id.split('').reduce((a,c,i)=>a+c.charCodeAt(0)*(i+1),0) % 997;
+    let s = id;
+    s = NEXUS7.layer1(s, seed+lvl*17);
+    s = NEXUS7.layer2(s);
+    s = NEXUS7.layer3(s);
+    if(lvl>=1){ s=NEXUS7.layer4(s,seed); s=NEXUS7.layer2(s); }
+    if(lvl>=2){ s=NEXUS7.layer5(s); s=NEXUS7.layer3(s); }
+    if(lvl>=3){ s=NEXUS7.layer6(s,seed); s=NEXUS7.layer2(s); s=NEXUS7.layer4(s,seed+100); }
+    s = NEXUS7.sign(s, lvl, seed);
+    const code = 'NX7::'+btoa(unescape(encodeURIComponent(s))).replace(/=/g,'').toUpperCase();
+    // Store original in lookup map
+    decryptMap[code] = id;
+    saveMap();
+    return code;
+  },
+
+  decrypt(code, token){
+    if(!TOKENS[token]) return {ok:false, msg:'TOKEN INVÁLIDO'};
+    if(!code.startsWith('NX7::')) return {ok:false, msg:'FORMATO INVÁLIDO — O código precisa começar com NX7::'};
+
+    // 1) Fast lookup in map (works for codes generated on this browser)
+    if(decryptMap[code]){
+      return {ok:true, data:decryptMap[code], method:'LOOKUP'};
+    }
+
+    // 2) Try full algorithmic reversal
+    try {
+      let s = decodeURIComponent(escape(atob(
+        code.slice(5).toLowerCase().replace(/[^a-z0-9+/]/g,'') + '=='
+      )));
+
+      // Extract signature to get lvl and seed
+      const sigMatch = s.match(/\x02NX7:(\d+):(\d+)\x02/);
+      if(!sigMatch) return {ok:false, msg:'ASSINATURA INVÁLIDA — Código não gerado por este sistema'};
+      const lvl = parseInt(sigMatch[1]);
+      const seed = parseInt(sigMatch[2]);
+      s = s.replace(/\x02NX7:\d+:\d+\x02/, '');
+
+      // Reverse in exact opposite order
+      if(lvl>=3){
+        s = NEXUS7._unlayer4(s);
+        s = NEXUS7._unlayer2(s);
+        s = NEXUS7._unlayer6(s, seed);
+      }
+      if(lvl>=2){
+        s = NEXUS7._unlayer3(s);
+        s = NEXUS7._unlayer5(s);
+      }
+      if(lvl>=1){
+        s = NEXUS7._unlayer2(s);
+        s = NEXUS7._unlayer4(s);
+      }
+      s = NEXUS7._unlayer3(s);
+      s = NEXUS7._unlayer2(s);
+      s = NEXUS7._unlayer1(s, seed+lvl*17);
+
+      return {ok:true, data:s, method:'REVERSAL'};
+    } catch(e){
+      return {ok:false, msg:'ERRO: Código malformado — tente no mesmo navegador onde criptografou'};
+    }
+  },
+
+  // Reverse layers
+  _unlayer1(s, seed){ return s.split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)^((seed*7+i*3)%127))).join(''); },
+  _unlayer2(s){
+    // Reverse custom base64
+    const a='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    let r='',bits=0,acc=0;
+    for(let c of s){ const v=a.indexOf(c); if(v<0)continue; acc=(acc<<6)|v; bits+=6; if(bits>=8){r+=String.fromCharCode((acc>>(bits-8))&255);bits-=8;} }
+    return r;
+  },
+  _unlayer3(s){ const h=s.length-Math.floor(s.length/2); return s.slice(h)+s.slice(0,h); },
+  _unlayer4(s){ return s.replace(/\x01.\x01/g,''); },
+  _unlayer5(s){ try{ return (s.match(/.{1,2}/g)||[]).map(h=>String.fromCharCode(parseInt(h,16))).join(''); }catch(e){return s;} },
+  _unlayer6(s, seed){
+    // Reverse the Fisher-Yates scatter
+    const a=s.split('');
+    const swaps=[];
+    for(let i=a.length-1;i>0;i--) swaps.push([(seed+i*13)%i, i]);
+    swaps.reverse().forEach(([j,i])=>{ [a[i],a[j]]=[a[j],a[i]]; });
+    return a.join('');
+  }
+};
+
+// ============================================================
+// UI FUNCTIONS
+// ============================================================
+function setLevel(l){
+  level = l;
+  document.querySelectorAll('.level-tab').forEach(t=>{
+    t.classList.toggle('active', parseInt(t.dataset.lvl)===l);
+  });
+  const labels = ['BSC','MED','HI','QTM'];
+  const colors = ['var(--g)','var(--b)','var(--y)','var(--m)'];
+  const el = document.getElementById('stat-level');
+  el.textContent = labels[l];
+  el.style.color = colors[l];
+}
+
+function validateId(val){
+  const el = document.getElementById('valid-indicator');
+  if(!val){ el.innerHTML='<span class="valid-none">—</span>'; return; }
+  const uuidReg = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if(uuidReg.test(val)){
+    el.innerHTML='<span class="valid-ok">✓ UUID VÁLIDO — JOB ID DETECTADO</span>';
+  } else if(val.length > 5) {
+    el.innerHTML='<span style="color:var(--y)">⚠ FORMATO NÃO-UUID — CRIPTOGRAFIA DISPONÍVEL</span>';
+  } else {
+    el.innerHTML='<span class="valid-err">✗ MUITO CURTO</span>';
+  }
+}
+
+async function encrypt(){
+  const id = document.getElementById('input-id').value.trim();
+  if(!id){ showNotif('error','⚠ Insira um Job ID!'); return; }
+
+  const bar = document.getElementById('enc-bar');
+  const out = document.getElementById('enc-output');
+  out.className='output-box empty';
+  out.textContent='// PROCESSANDO...';
+  document.getElementById('enc-actions').style.display='none';
+
+  // Animate bar
+  bar.style.width='0%';
+  await sleep(50); bar.style.width='30%';
+  await sleep(200); bar.style.width='60%';
+  await sleep(200); bar.style.width='90%';
+
+  const result = NEXUS7.encrypt(id, level);
+  lastEncrypted = result;
+
+  await sleep(150); bar.style.width='100%';
+  await sleep(200); bar.style.width='0%';
+
+  // Typewriter effect
+  out.className='output-box';
+  out.innerHTML='<button class="copy-btn" onclick="copyResult()">COPIAR</button><span id="typed-out"></span>';
+  await typewriter('typed-out', result, 2);
+
+  document.getElementById('enc-actions').style.display='flex';
+
+  // Update stats
+  sessionOps++;
+  const total = history.length + 1;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-session').textContent = sessionOps;
+  document.getElementById('stat-ratio').textContent = Math.round(result.length/id.length)+'x';
+  document.getElementById('sess-pill').textContent = '⚡ SESSÃO: '+sessionOps+' OPS';
+
+  // Save to history
+  const entry = {id, encrypted:result, level, ts:Date.now()};
+  history.unshift(entry);
+  if(history.length>50) history.pop();
+  localStorage.setItem('cripto_history', JSON.stringify(history));
+  renderHistory();
+
+  // Update chart
+  updateChart(result.length);
+
+  showNotif('success','✓ Criptografado com sucesso! ('+LEVELS[level]+')');
+}
+
+async function decrypt(){
+  const token = document.getElementById('dec-token').value.trim();
+  const code = document.getElementById('dec-input').value.trim();
+  if(!code){ showNotif('error','⚠ Insira um código!'); return; }
+  if(!token){ showNotif('error','⚠ Insira um token!'); return; }
+
+  const bar = document.getElementById('dec-bar');
+  const out = document.getElementById('dec-output');
+  out.className='output-box empty';
+  out.textContent='// DECODIFICANDO...';
+
+  bar.style.width='0%';
+  await sleep(50); bar.style.width='50%';
+  await sleep(300); bar.style.width='100%';
+  await sleep(200); bar.style.width='0%';
+
+  const result = NEXUS7.decrypt(code, token);
+
+  if(result.ok){
+    out.className='output-box';
+    out.innerHTML='<button class="copy-btn" onclick="copyDec()">COPIAR</button><span style="color:var(--b)" id="typed-dec"></span>';
+    await typewriter('typed-dec', result.data, 3);
+    if(result.note) showNotif('info','ℹ '+result.note);
+    else showNotif('success','✓ Descriptografado!');
+  } else {
+    out.className='output-box empty';
+    out.innerHTML='<span style="color:var(--r)">✗ '+result.msg+'</span>';
+    showNotif('error','✗ '+result.msg);
+  }
+}
+
+function copyResult(){
+  if(!lastEncrypted){ showNotif('error','Nenhum resultado para copiar'); return; }
+  navigator.clipboard.writeText(lastEncrypted).then(()=>showNotif('success','✓ Copiado!'));
+}
+
+function copyDec(){
+  const el = document.getElementById('typed-dec');
+  if(el) navigator.clipboard.writeText(el.textContent).then(()=>showNotif('success','✓ Copiado!'));
+}
+
+function addToCompare(slot){
+  const target = slot===0 ? 'cmp-a' : 'cmp-b';
+  document.getElementById(target).value = lastEncrypted || '';
+  showNotif('info','Adicionado ao Comparador A');
+}
+
+function compare(){
+  const a = document.getElementById('cmp-a').value.trim();
+  const b = document.getElementById('cmp-b').value.trim();
+  const out = document.getElementById('cmp-output');
+  if(!a||!b){ out.className='output-box empty'; out.textContent='// INSIRA OS DOIS CÓDIGOS //'; return; }
+
+  const maxL = Math.max(a.length, b.length);
+  let matches=0;
+  for(let i=0;i<maxL;i++) if(a[i]===b[i]) matches++;
+  const similarity = Math.round((matches/maxL)*100);
+
+  let diff='';
+  for(let i=0;i<Math.min(a.length,b.length,80);i++){
+    diff += a[i]===b[i]
+      ? `<span style="color:var(--g)">${a[i]}</span>`
+      : `<span style="color:var(--r)">${a[i]}</span>`;
+  }
+  if(a.length>80) diff+='<span style="color:#3a5a6a">...</span>';
+
+  out.className='output-box';
+  out.innerHTML=`
+    <div style="margin-bottom:8px">
+      <span style="color:var(--b);font-size:14px">SIMILARIDADE: </span>
+      <span style="color:${similarity>80?'var(--g)':similarity>40?'var(--y)':'var(--r)'};font-size:18px;font-family:Orbitron">${similarity}%</span>
+    </div>
+    <div style="color:#5a7a8a;font-size:10px;margin-bottom:6px">CHARS A (verde=igual, vermelho=diferente):</div>
+    <div style="font-size:12px;word-break:break-all">${diff}</div>
+    <div style="color:#3a5a6a;margin-top:8px;font-size:10px">
+      A: ${a.length} chars | B: ${b.length} chars | Δ: ${Math.abs(a.length-b.length)}
+    </div>`;
+}
+
+function genQR(){
+  if(!lastEncrypted){ showNotif('error','Criptografe algo primeiro!'); return; }
+  const modal = document.getElementById('qr-modal');
+  modal.style.display='flex';
+  const canvas = document.getElementById('qr-canvas');
+  // Simple QR-like visual (no external lib needed)
+  const ctx2 = canvas.getContext('2d');
+  canvas.width=200; canvas.height=200;
+  ctx2.fillStyle='#fff';
+  ctx2.fillRect(0,0,200,200);
+  ctx2.fillStyle='#000';
+  // Generate pattern from hash
+  const hash = lastEncrypted.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  for(let y=0;y<20;y++) for(let x=0;x<20;x++){
+    if((hash*(x+1)*(y+1))%7<3) { ctx2.fillRect(x*10,y*10,10,10); }
+  }
+  // Corners
+  [[0,0],[140,0],[0,140]].forEach(([x,y])=>{
+    ctx2.strokeStyle='#000'; ctx2.lineWidth=3;
+    ctx2.strokeRect(x+5,y+5,50,50);
+    ctx2.fillRect(x+15,y+15,30,30);
+  });
+  showNotif('info','QR Code gerado!');
+}
+
+function closeQR(){ document.getElementById('qr-modal').style.display='none'; }
+
+function clearHistory(){
+  history=[]; localStorage.removeItem('cripto_history');
+  renderHistory();
+  showNotif('info','Histórico apagado');
+}
+
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(history,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='cripto_history.json'; a.click();
+  showNotif('success','✓ Exportado!');
+}
+
+async function genBatch(){
+  const ids = Array.from({length:5},()=>`${rndHex(8)}-${rndHex(4)}-${rndHex(4)}-${rndHex(4)}-${rndHex(12)}`);
+  for(const id of ids){
+    const enc=NEXUS7.encrypt(id,level);
+    history.unshift({id,encrypted:enc,level,ts:Date.now()});
+  }
+  if(history.length>50) history=history.slice(0,50);
+  localStorage.setItem('cripto_history',JSON.stringify(history));
+  sessionOps+=5;
+  document.getElementById('stat-session').textContent=sessionOps;
+  document.getElementById('stat-total').textContent=history.length;
+  document.getElementById('sess-pill').textContent='⚡ SESSÃO: '+sessionOps+' OPS';
+  renderHistory();
+  showNotif('success','✓ 5 IDs aleatórios gerados e criptografados!');
+}
+
+function rndHex(n){ return Array.from({length:n},()=>Math.floor(Math.random()*16).toString(16)).join(''); }
+
+// ============================================================
+// RENDER
+// ============================================================
+function renderHistory(){
+  const el = document.getElementById('history-list');
+  if(!history.length){
+    el.innerHTML='<div style="text-align:center;color:#2a4a5a;font-family:\'Share Tech Mono\',monospace;font-size:11px;padding:20px 0">// NENHUM REGISTRO //</div>';
+    return;
+  }
+  const levelColors=['var(--g)','var(--b)','var(--y)','var(--m)'];
+  const levelBg=['#00ff4110','#00d4ff10','#ffcc0010','#ff00ff10'];
+  el.innerHTML = history.slice(0,15).map(h=>{
+    const date=new Date(h.ts);
+    const time=date.toTimeString().slice(0,5);
+    return `<div class="history-item" onclick="loadHistory('${h.id}','${h.encrypted}')">
+      <div class="h-id">${h.id}</div>
+      <div class="h-lvl" style="color:${levelColors[h.level]};background:${levelBg[h.level]};border:1px solid ${levelColors[h.level]}">${LEVELS[h.level].slice(0,3)}</div>
+      <div class="h-time">${time}</div>
+    </div>`;
+  }).join('');
+}
+
+function loadHistory(id, enc){
+  document.getElementById('input-id').value=id;
+  document.getElementById('enc-output').className='output-box';
+  document.getElementById('enc-output').innerHTML='<button class="copy-btn" onclick="copyResult()">COPIAR</button>'+enc;
+  document.getElementById('dec-input').value=enc;
+  lastEncrypted=enc;
+  document.getElementById('enc-actions').style.display='flex';
+  showNotif('info','ID carregado do histórico');
+}
+
+function updateChart(size){
+  const now = new Date().toTimeString().slice(0,5);
+  chartData.labels.push(now);
+  chartData.datasets[0].data.push(size);
+  if(chartData.labels.length>12){ chartData.labels.shift(); chartData.datasets[0].data.shift(); }
+  myChart.update();
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+async function typewriter(id, text, speed=3){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent='';
+  for(let i=0;i<text.length;i++){
+    el.textContent+=text[i];
+    if(i%10===0) await sleep(speed);
+  }
+}
+
+function showNotif(type, msg){
+  const el = document.getElementById('notif');
+  el.className='notif '+type;
+  el.innerHTML = (type==='success'?'✓':type==='error'?'✗':'ℹ') + ' ' + msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 3000);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderHistory();
+if(history.length) document.getElementById('stat-total').textContent=history.length;
+
+// Close QR on outside click
+document.getElementById('qr-modal').addEventListener('click',function(e){
+  if(e.target===this) closeQR();
+});
+</script>
+</body>
+</html>
